@@ -22,6 +22,7 @@ An event consists in a system that responds to some kind of action triggered by 
 
 
 [Base Api Address:](https://groupietrackers.herokuapp.com/api)
+
 ---
 
 ## Authors
