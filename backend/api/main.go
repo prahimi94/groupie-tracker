@@ -217,9 +217,10 @@ func handleArtist(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Println("url is: ", url, " id is: ", id)
-		tmpl, err := template.ParseFiles(publicUrl + "artists.html")
+		tmpl, err := template.ParseFiles(publicUrl + "artist.html")
 		if err != nil {
 			handleErrorPage(w, r, InternalServerError)
+			fmt.Println(err.Error())
 			return
 		}
 		var data_obj_array []ArtistsData
@@ -540,5 +541,9 @@ func main() {
 	// http.HandleFunc("/ascii-web", handleAsciiWeb)
 	// Start the server on port 8082
 	fmt.Println("Starting server on 0.0.0.0:8080")
-	http.ListenAndServe("0.0.0.0:8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("we are here")
+	}
 }
