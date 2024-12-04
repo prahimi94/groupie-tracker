@@ -106,7 +106,6 @@ var (
 )
 
 func sendGetRequest(url string, data_obj interface{}) {
-	fmt.Println("url: ", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Print(err.Error())
@@ -121,7 +120,6 @@ func sendGetRequest(url string, data_obj interface{}) {
 	if readErr != nil {
 		fmt.Print(err.Error())
 	}
-	fmt.Println(string(body))
 
 	jsonErr := json.Unmarshal(body, &data_obj)
 	if jsonErr != nil {
@@ -171,7 +169,11 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 		var data_obj []ArtistsData
 		sendGetRequest(apiUrls["artists"], &data_obj)
 
-		tmpl, err := template.ParseFiles(publicUrl + "index.html")
+		tmpl, err := template.ParseFiles(
+			publicUrl+"index.html",
+			publicUrl+"header.html",
+			publicUrl+"artists.html",
+		)
 
 		if err != nil {
 			handleErrorPage(w, r, InternalServerError)
@@ -183,31 +185,33 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleArtists(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		url, id, errUrl := generateUrl(r.URL.Path, "artists")
-		if errUrl == "not found" {
-			handleErrorPage(w, r, NotFoundError)
-			return
-		}
-		fmt.Println("url is: ", url, " id is: ", id)
-		tmpl, err := template.ParseFiles(publicUrl + "artists.html")
-		if err != nil {
-			handleErrorPage(w, r, InternalServerError)
-			return
-		}
-		var data_obj_array []ArtistsData
+// func handleArtists(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method == http.MethodGet {
+// 		url, _, errUrl := generateUrl(r.URL.Path, "artists")
+// 		if errUrl == "not found" {
+// 			handleErrorPage(w, r, NotFoundError)
+// 			return
+// 		}
 
-		sendGetRequest(url, &data_obj_array)
-		fmt.Println("is here 1")
-		fmt.Println(data_obj_array)
+// 		tmpl, err := template.ParseFiles(
+// 			publicUrl+"artists.html",
+// 			publicUrl+"header.html",
+// 			publicUrl+"artists_content.html",
+// 		)
+// 		if err != nil {
+// 			handleErrorPage(w, r, InternalServerError)
+// 			return
+// 		}
+// 		var data_obj_array []ArtistsData
 
-		tmpl.Execute(w, data_obj_array)
+// 		sendGetRequest(url, &data_obj_array)
 
-	} else {
-		handleErrorPage(w, r, MethodNotAllowedError)
-	}
-}
+// 		tmpl.Execute(w, data_obj_array)
+
+// 	} else {
+// 		handleErrorPage(w, r, MethodNotAllowedError)
+// 	}
+// }
 
 func handleArtist(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
@@ -216,26 +220,47 @@ func handleArtist(w http.ResponseWriter, r *http.Request) {
 			handleErrorPage(w, r, NotFoundError)
 			return
 		}
-		fmt.Println("url is: ", url, " id is: ", id)
-		tmpl, err := template.ParseFiles(publicUrl + "artist.html")
+
+		tmpl, err := template.ParseFiles(
+			publicUrl+"artist.html",
+			publicUrl+"artist_info.html",
+			publicUrl+"artist_dates.html",
+			publicUrl+"artist_locations.html",
+			publicUrl+"artist_relation.html",
+		)
 		if err != nil {
 			handleErrorPage(w, r, InternalServerError)
-			fmt.Println(err.Error())
 			return
 		}
-		var data_obj_array []ArtistsData
 
 		var data_obj ArtistsData
 		sendGetRequest(url+"/"+id, &data_obj)
-		fmt.Println("is here 2")
-		fmt.Println(data_obj)
 
-		data_obj_array = []ArtistsData{data_obj}
+		var date_data_obj DatesDataLevel2
+		sendGetRequest(data_obj.ConcertDates, &date_data_obj)
 
-		fmt.Println("is here 2.5")
-		fmt.Println(data_obj_array)
+		var location_data_obj LocationsDataLevel2
+		sendGetRequest(data_obj.Locations, &location_data_obj)
+		sendGetRequest(data_obj.ConcertDates, &date_data_obj)
 
-		tmpl.Execute(w, data_obj_array)
+		var relation_data_obj RelationsDataLevel2
+		sendGetRequest(data_obj.Relations, &relation_data_obj)
+
+		templateData := struct {
+			ArtistInfo      ArtistsData
+			ArtistDates     DatesDataLevel2
+			ArtistLocations LocationsDataLevel2
+			Relation        RelationsDataLevel2
+		}{
+			ArtistInfo:      data_obj,
+			ArtistDates:     date_data_obj,
+			ArtistLocations: location_data_obj,
+			Relation:        relation_data_obj,
+		}
+
+		fmt.Printf("%+v\n", templateData)
+
+		tmpl.Execute(w, templateData)
 
 	} else {
 		handleErrorPage(w, r, MethodNotAllowedError)
@@ -525,7 +550,7 @@ func main() {
 
 	http.HandleFunc("/", handleIndex)
 
-	http.HandleFunc("/artists", handleArtists)
+	// http.HandleFunc("/artists", handleArtists)
 	http.HandleFunc("/artist/", handleArtist) //for dynamic routes
 
 	http.HandleFunc("/locations", handleLocations)
