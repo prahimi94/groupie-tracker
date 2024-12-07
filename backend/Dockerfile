@@ -1,7 +1,7 @@
 FROM golang:1.23-alpine
 
 LABEL version="1.0" \
-        description="ASCII-ART-WEB Dockerized Application"\
+        description="Groupie-tracker Dockerized Application"\
         author="PR-MR" \
         maintainer="parisa.rahimi@gritlab.ax" \
         environment="development"

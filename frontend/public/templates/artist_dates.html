@@ -1,0 +1,13 @@
+{{define "artist_dates"}}
+
+<table class="table table-light table-hover table-borderless rounded-3 overflow-hidden">
+    <tbody>
+        {{range .Dates}}
+            <tr>
+                <td >{{.}} <span class="badge rounded-pill text-bg-danger">Expired</span></td>
+            </tr>
+        {{end}}
+    </tbody>
+</table>
+
+{{end}}

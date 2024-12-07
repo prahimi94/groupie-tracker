@@ -1,0 +1,23 @@
+{{define "artist_locations"}}
+
+<table class="table table-light table-hover rounded-3 overflow-hidden">
+    <tbody>
+        {{range $key, $value := .Locations}}
+            <tr>
+                <th id="location-counter-{{$key}}">{{$key}}</th>
+                <td >{{$value}}</td>
+            </tr>
+        {{end}}
+    </tbody>
+</table>
+
+<script>
+    var elms = document.querySelectorAll('[id^="location-counter-"]');
+ 
+    for(var i = 0; i < elms.length; i++) {
+        const key = parseInt(elms[i].textContent, 10);
+        elms[i].textContent = key + 1;
+    }
+</script>
+
+{{end}}

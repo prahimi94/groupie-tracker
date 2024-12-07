@@ -1,0 +1,33 @@
+{{define "dates"}}
+
+
+{{$DatesData := .DatesData.Index}}
+{{$ArtistsData := .ArtistsData}}
+
+<div class="container">
+  <div class="row row-cols-1 row-cols-md-3 mb-3 text-center ">
+    {{range $keyIndex, $keyValue := $DatesData}}
+    {{ $artist_name := "No data available" }}
+    {{ if eq $keyValue.Id (index $ArtistsData $keyIndex).Id }}
+    {{ $artist_name = (index $ArtistsData $keyIndex).Name }}
+    {{ end }}
+
+      <div class="col ">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-header py-3">
+            <h4 class="my-0 fw-normal">id: {{$keyValue.Id}} - Artist name: {{$artist_name}}</h4>
+          </div>
+          <div class="card-body" style="height: 200px;overflow-y: scroll;">
+            <ul class="list-group mt-3 mb-4" >
+              {{ range $keyValue.Dates }}
+                <li class="list-group-item list-group-item-action">{{.}}</li>
+              {{end}}
+            </ul>
+          </div>
+        </div>
+      </div>
+    {{end}}
+  </div>
+</div>
+
+{{end}}

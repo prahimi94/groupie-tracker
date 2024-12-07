@@ -1,0 +1,32 @@
+{{define "artists_swiper"}}
+<div class="mt-5">
+  <div class="swiper-container position-relative d-flex overflow-x-hidden py-lg-4 pt-4">
+    <div class="swiper-wrapper d-flex gap-3">
+      {{range .}}
+      <a href="artist/{{.Id}}" class="swiper-slide artist-swiper-animatin shadow bg-dark-subtle text-center shadow-sm text-wrap rounded-4 w-100 border card-lift border" style="width: 200px !important; text-decoration: none;--bs-text-opacity: 1;color: var(--bs-secondary-color) !important;min-height: 200px;">
+        <!--img-->
+        <div class="p-3">
+          <img src="{{.Image}}" alt="{{.Name}}" class="avatar avatar-xl rounded-circle" style="width: 60%;" />
+          <!--content-->
+          <div class="mt-3">
+            <p class="mb-0 ">{{.Name}}</p>
+          </div>
+        </div>
+      </a>
+      {{end}}
+
+    </div>
+  </div>
+</div>
+<style>
+  .artist-swiper-animatin {
+    top: 0;
+    transition: top .5s, box-shadow .5s;
+  }
+
+  .artist-swiper-animatin:hover {
+    top: -12px;
+    box-shadow: var(--bs-box-shadow-lg) !important;
+  }
+</style>
+{{end}}

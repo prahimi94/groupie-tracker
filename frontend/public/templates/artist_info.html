@@ -1,0 +1,19 @@
+{{define "artist_info"}}
+
+<div class="container col-xxl-8 px-4 py-5">
+  <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+    <div class="col-lg-6">
+      <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-5">{{.Name}}</h1>
+      <p class="lead">
+        We are the {{.Name}} band<br/>
+        Our creation date is: {{.CreationDate}}.<br/>
+        Our first albulm published at: {{.FirstAlbum}}.
+      </p>
+    </div>
+    <div class="col-10 col-sm-8 col-lg-6">
+      <img src="{{.Image}}" class="shadow rounded-3 d-block mx-lg-auto img-fluid" alt="{{.Name}}" width="350" height="350" loading="lazy">
+    </div>
+  </div>
+</div>
+
+{{end}}
