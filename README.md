@@ -59,7 +59,7 @@ An event consists in a system that responds to some kind of action triggered by 
 ## Project Structure and Implementation
 Project has 2 main components
 
-Backend: Include Dockerfile, webserver, Api, Tests, AsciiArt service and Banners
+Backend: Include Dockerfile, webserver, Api and Tests
 
 Frontend: Include html templates, error files and assets
 
