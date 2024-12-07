@@ -384,64 +384,6 @@ func handleRelations(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, templateData)
 }
 
-func handleSearch(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		handleErrorPage(w, r, MethodNotAllowedError)
-		return
-	}
-
-	// Parse the form data
-	err := r.ParseForm()
-	if err != nil {
-		handleErrorPage(w, r, BadRequestError)
-		return
-	}
-
-	if len(r.FormValue("search_text")) == 0 {
-		handleErrorPage(w, r, BadRequestError)
-		return
-	}
-	inputText := r.FormValue("search_text")
-
-	var artistData []ArtistsData
-	sendGetRequest(apiUrls["artists"], &artistData)
-
-	id := 0
-	for _, v := range artistData {
-		if v.Name == inputText {
-			id = v.Id
-		}
-	}
-
-	if id == 0 {
-		handleErrorPage(w, r, NotFoundError)
-		return
-	}
-
-	scheme := r.URL.Scheme
-	if scheme == "" {
-		if r.TLS != nil {
-			scheme = "https"
-		} else {
-			scheme = "http"
-		}
-	}
-
-	host := r.Host
-
-	// Send the GET request
-	req, err := http.NewRequest("GET", scheme+"://"+host+"/artist/"+strconv.Itoa(id), nil)
-	if err != nil {
-		fmt.Print(err.Error())
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Print(err.Error())
-	}
-	defer res.Body.Close()
-
-}
-
 func handleErrorPage(w http.ResponseWriter, r *http.Request, errorType ErrorPageData) {
 	tmpl, err := template.ParseFiles("frontend/errors/error.html")
 	if err != nil {
@@ -467,8 +409,6 @@ func main() {
 	http.HandleFunc("/dates", handleDates)
 
 	http.HandleFunc("/tours", handleRelations)
-
-	http.HandleFunc("/search", handleSearch)
 
 	// Start the server on port 8080
 	fmt.Println("Starting server on 0.0.0.0:8080")
