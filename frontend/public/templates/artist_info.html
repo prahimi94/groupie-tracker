@@ -9,6 +9,18 @@
         Our creation date is: {{.CreationDate}}.<br/>
         Our first albulm published at: {{.FirstAlbum}}.
       </p>
+      <br/>
+      <h2 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">Members:</h1>
+        <table class="table table-light table-hover table-borderless rounded-3 overflow-hidden">
+          <tbody>
+              {{range .Members}}
+                  <tr>
+                      <td >{{.}}</td>
+                  </tr>
+              {{end}}
+          </tbody>
+        </table>
+      
     </div>
     <div class="col-10 col-sm-8 col-lg-6">
       <img src="{{.Image}}" class="shadow rounded-3 d-block mx-lg-auto img-fluid" alt="{{.Name}}" width="350" height="350" loading="lazy">
