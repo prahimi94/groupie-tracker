@@ -1,32 +1,28 @@
 var Swipes = new Swiper('.swiper-container', {
-    spaceBetween: 0,
-    centeredSlides: false,
-    speed: 5000,
-    autoplay: {
-    delay: 1,
-    },
-    loop: true,
-    loopedSlides: 4,
-    slidesPerView:'auto',
-    allowTouchMove: false,
-    disableOnInteraction: true
+  spaceBetween: 0,
+  centeredSlides: false,
+  speed: 5000,
+  autoplay: {
+  delay: 1,
+  },
+  loop: true,
+  loopedSlides: 4,
+  slidesPerView:'auto',
+  allowTouchMove: false,
+  disableOnInteraction: true
 });
-// $(document).ready(function(){
-// $("#find-artist").on("click", function() {
-//     $('.artist-name').each(function(i, obj) {
-//         var value = $("#search-text").val().toLowerCase();
-//         var element_p_id = $(this).attr('id');
-//         var element_a_id = element_p_id.replace("-p-", "-a-");
-//         if ($(this).text().toLowerCase().indexOf(value) > -1) {
-//         console.log($(this).text())
-//         console.log(element_a_id)
-//         $("#"+element_a_id).show();
-//         } else {
-//         $("#"+element_a_id).hide();
-//         }
-//     });
-//     });
-// });
+
+var yourNavigation = $(".nav-filter");
+    stickyDiv = "sticky-filter";
+    yourHeader = $('.hero-title').outerHeight() + $('nav.navbar').outerHeight() + 150;
+
+$(window).scroll(function() {
+  if( $(this).scrollTop() > yourHeader ) {
+    yourNavigation.addClass(stickyDiv);
+  } else {
+    yourNavigation.removeClass(stickyDiv);
+  }
+});
 
 const creation_date = document.getElementById('creation_date');
 const creation_date_value = document.getElementById('creation_date_value');
@@ -65,17 +61,28 @@ if(first_album_date){
 
     });
 }
-    
 
-var yourNavigation = $(".nav-filter");
-    stickyDiv = "sticky-filter";
-    yourHeader = $('.hero-title').outerHeight() + $('nav.navbar').outerHeight() + 150;
+const checkboxes = document.querySelectorAll('input[name="members[]"]');
+checkboxes.forEach(checkbox => {
+  checkbox.addEventListener('change', () => {
+    const isChecked = checkbox.checked;
+    const value = checkbox.value;
 
-$(window).scroll(function() {
-  if( $(this).scrollTop() > yourHeader ) {
-    yourNavigation.addClass(stickyDiv);
-  } else {
-    yourNavigation.removeClass(stickyDiv);
-  }
+    // Get all currently checked values
+    const selectedValues = Array.from(checkboxes)
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => parseInt(checkbox.value, 10));
+
+    $.each(JSON.parse(allArtists), function( index, value ) {
+        const membersCount = value['members'].length;
+
+        if(!selectedValues.includes(membersCount)){
+          $('#artist_' + value.id).hide()
+        } else {
+          $('#artist_' + value.id).show()
+        }
+    });
+  });
 });
+
 
