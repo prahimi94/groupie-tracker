@@ -98,13 +98,17 @@ var (
 	InternalServerError   = PredefinedErrors["InternalServerError"]
 )
 
-func sendGetRequest(url string, data_obj interface{}) {
+func sendGetRequest(url string, data_obj interface{}, client *http.Client) {
+	// Use the default client if none is provided
+	if client == nil {
+		client = http.DefaultClient
+	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Print(err.Error())
 	}
 	// req.Header.Add("x-rapidapi-key", "YOU_API_KEY")
-	res, err := http.DefaultClient.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		fmt.Print(err.Error())
 	}
@@ -129,7 +133,7 @@ func getApiUrls() {
 	}
 
 	var data_obj ApiInfo
-	sendGetRequest(apiUrls["base"], &data_obj)
+	sendGetRequest(apiUrls["base"], &data_obj, nil)
 
 	apiUrls["artists"] = data_obj.Artists
 	apiUrls["dates"] = data_obj.Dates
@@ -152,6 +156,7 @@ func generateUrl(path string, desiredUrl string) (string, string, string) {
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
 	}
@@ -175,7 +180,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data_obj []ArtistsData
-	sendGetRequest(apiUrls["artists"], &data_obj)
+	sendGetRequest(apiUrls["artists"], &data_obj, nil)
 
 	tmpl.Execute(w, data_obj)
 }
@@ -205,7 +210,7 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data_obj_array []ArtistsData
-	sendGetRequest(url, &data_obj_array)
+	sendGetRequest(url, &data_obj_array, nil)
 
 	jsonData, err := json.Marshal(data_obj_array)
 	if err != nil {
@@ -222,7 +227,6 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 		ArtistsJsonData: string(jsonData),
 	}
 
-	// Pass this JSON string to the template
 	tmpl.Execute(w, data_obj_sender)
 }
 
@@ -253,16 +257,16 @@ func handleArtist(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data_obj ArtistsData
-	sendGetRequest(url+"/"+id, &data_obj)
+	sendGetRequest(url+"/"+id, &data_obj, nil)
 
 	var date_data_obj DatesDataLevel2
-	sendGetRequest(data_obj.ConcertDates, &date_data_obj)
+	sendGetRequest(data_obj.ConcertDates, &date_data_obj, nil)
 
 	var location_data_obj LocationsDataLevel2
-	sendGetRequest(data_obj.Locations, &location_data_obj)
+	sendGetRequest(data_obj.Locations, &location_data_obj, nil)
 
 	var relation_data_obj RelationsDataLevel2
-	sendGetRequest(data_obj.Relations, &relation_data_obj)
+	sendGetRequest(data_obj.Relations, &relation_data_obj, nil)
 
 	templateData := struct {
 		ArtistInfo      ArtistsData
@@ -308,10 +312,10 @@ func handleLocations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data_obj_array []ArtistsData
-	sendGetRequest(apiUrls["artists"], &data_obj_array)
+	sendGetRequest(apiUrls["artists"], &data_obj_array, nil)
 
 	var data_obj LocationsDataLevel1
-	sendGetRequest(url, &data_obj)
+	sendGetRequest(url, &data_obj, nil)
 
 	templateData := struct {
 		ArtistsData   []ArtistsData
@@ -350,10 +354,10 @@ func handleDates(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data_obj_array []ArtistsData
-	sendGetRequest(apiUrls["artists"], &data_obj_array)
+	sendGetRequest(apiUrls["artists"], &data_obj_array, nil)
 
 	var data_obj DatesDataLevel1
-	sendGetRequest(url, &data_obj)
+	sendGetRequest(url, &data_obj, nil)
 
 	templateData := struct {
 		ArtistsData []ArtistsData
@@ -385,10 +389,10 @@ func handleRelations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data_obj_array []ArtistsData
-	sendGetRequest(apiUrls["artists"], &data_obj_array)
+	sendGetRequest(apiUrls["artists"], &data_obj_array, nil)
 
 	var relation_data_obj RelationsDataLevel1
-	sendGetRequest(apiUrls["relations"], &relation_data_obj)
+	sendGetRequest(apiUrls["relations"], &relation_data_obj, nil)
 
 	templateData := struct {
 		ArtistsData   []ArtistsData
@@ -411,6 +415,64 @@ func handleErrorPage(w http.ResponseWriter, r *http.Request, errorType ErrorPage
 	tmpl.Execute(w, errorType)
 }
 
+func handleSearch(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		handleErrorPage(w, r, MethodNotAllowedError)
+		return
+	}
+
+	searchText := r.URL.Query().Get("search_text")
+	if searchText == "" {
+		handleIndex(w, r)
+		return
+	}
+
+	var data_obj []ArtistsData
+	sendGetRequest(apiUrls["artists"], &data_obj, nil)
+
+	var filteredArtists []ArtistsData
+	for _, artist := range data_obj {
+		if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(searchText)) {
+			filteredArtists = append(filteredArtists, artist)
+		}
+	}
+
+	if len(filteredArtists) == 0 {
+		handleErrorPage(w, r, NotFoundError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles(
+		publicUrl+"artists.html",
+		publicUrl+"templates/header.html",
+		publicUrl+"templates/menu.html",
+		publicUrl+"templates/hero.html",
+		publicUrl+"templates/artist_filter.html",
+		publicUrl+"templates/footer.html",
+	)
+	if err != nil {
+		handleErrorPage(w, r, InternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(filteredArtists)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	type ArtistsDataForPass struct {
+		Artists         []ArtistsData
+		ArtistsJsonData string
+	}
+
+	var data_obj_sender = ArtistsDataForPass{
+		Artists:         filteredArtists,
+		ArtistsJsonData: string(jsonData),
+	}
+
+	tmpl.Execute(w, data_obj_sender)
+}
+
 func main() {
 	getApiUrls()
 	http.Handle("/static/", http.FileServer(http.Dir("./frontend/public/")))
@@ -426,6 +488,8 @@ func main() {
 	http.HandleFunc("/dates", handleDates)
 
 	http.HandleFunc("/tours", handleRelations)
+
+	http.HandleFunc("/search", handleSearch)
 
 	// Start the server on port 8080
 	fmt.Println("Starting server on 0.0.0.0:8080")

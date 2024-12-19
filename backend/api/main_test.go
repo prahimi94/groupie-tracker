@@ -1,51 +1,51 @@
 package main
 
 import (
-	"io/ioutil"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"regexp"
 	"strings"
 	"testing"
 )
 
-func TestHandleForm(t *testing.T) {
-	// Change to the root directory of the project
+func TestHandleIndex(t *testing.T) {
+	// // Change to the root directory of the project
 	err := os.Chdir("../../")
 	if err != nil {
 		t.Fatalf("Error changing directory: %v", err)
 	}
 	// Test for GET request
-	log.Println("Starting TestHandleForm - GET request")
+	log.Println("Starting TestHandleIndex - GET request")
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		log.Fatalf("Failed to create GET request: %v", err)
 	}
+
 	// Create a response recorder to capture the response
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handleForm)
+	handler := http.HandlerFunc(handleIndex)
 
 	// Perform the GET request
 	handler.ServeHTTP(rr, req)
 
 	// Check the status code
 	if status := rr.Code; status != http.StatusOK {
-		log.Printf("TestHandleForm - GET request: Expected status %v, got %v", http.StatusOK, status)
-		t.Errorf("handleForm returned wrong status code: got %v want %v", status, http.StatusOK)
+		log.Printf("TestHandleIndex - GET request: Expected status %v, got %v", http.StatusOK, status)
+		t.Errorf("HandleIndex returned wrong status code: got %v want %v", status, http.StatusOK)
 	} else {
-		log.Printf("TestHandleForm - GET request: Received status %v, as expected", status)
+		log.Printf("TestHandleIndex - GET request: Received status %v, as expected", status)
 	}
 
 	// Check if the response contains the correct content (assuming the HTML file is served)
-	expected := `<p>ASCII-ART-WEB by PR & MR</p>` // Add a unique identifier that would appear in the HTML
+	expected := `<p class="col-md-4 mb-0 text-body-secondary">© 2024 GT by PR & MR</p>` // Add a unique identifier that would appear in the HTML
 
 	if !strings.Contains(rr.Body.String(), expected) {
-		log.Printf("TestHandleForm - GET request: Expected content not found in response body")
-		t.Errorf("handleForm returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		log.Printf("TestHandleIndex - GET request: Expected content not found in response body")
+		t.Errorf("HandleIndex returned unexpected body: got %v want %v", rr.Body.String(), expected)
 	} else {
-		log.Printf("TestHandleForm - GET request: Correct content found in response body")
+		log.Printf("TestHandleIndex - GET request: Correct content found in response body")
 	}
 
 	// Test for POST request (Should return Method Not Allowed)
@@ -58,10 +58,77 @@ func TestHandleForm(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusMethodNotAllowed {
-		log.Printf("TestHandleForm - POST request: Expected status %v, got %v", http.StatusMethodNotAllowed, status)
-		t.Errorf("handleForm returned wrong status code for POST: got %v want %v", status, http.StatusMethodNotAllowed)
+		log.Printf("TestHandleIndex - POST request: Expected status %v, got %v", http.StatusMethodNotAllowed, status)
+		t.Errorf("HandleIndex returned wrong status code for POST: got %v want %v", status, http.StatusMethodNotAllowed)
 	} else {
-		log.Printf("TestHandleForm - POST request: Received status %v, as expected", status)
+		log.Printf("TestHandleIndex - POST request: Received status %v, as expected", status)
+	}
+}
+
+func TestHandleArtists(t *testing.T) {
+	// Create a mock server to simulate the API
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Return mock JSON data for the /artists endpoint
+		if r.URL.Path == "/api/artists" {
+			mockData := []ArtistsData{
+				{
+					Id:      1,
+					Image:   "https://groupietrackers.herokuapp.com/api/images/queen.jpeg",
+					Name:    "Queen",
+					Members: []string{"Freddie Mercury", "Brian May", "Roger Taylor", "John Deacon"},
+					// Add other fields as needed
+				},
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(mockData)
+		} else {
+			http.NotFound(w, r)
+		}
+	}))
+	defer mockServer.Close()
+
+	// Mock the API URL
+	apiUrls["artists"] = mockServer.URL + "/api/artists"
+
+	// Test for GET request
+	log.Println("Starting TestHandleArtists - GET request")
+	req, err := http.NewRequest("GET", "/artists", nil)
+	if err != nil {
+		t.Fatalf("Failed to create GET request: %v", err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(handleArtists)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("HandleArtists returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+
+	// Check if the response contains the correct content (assuming the HTML file is served)
+	expected := `<div class="card" style="width: 100%;">
+                  <img src="https://groupietrackers.herokuapp.com/api/images/queen.jpeg" class="card-img-top" alt="Queen" style="max-height: 286px;">
+                  <div class="card-body">
+                    <h5 class="card-title mb-3">Queen</h5>
+                    <a href="artist/1" class="btn btn-outline-info">Show More Info</a>
+                  </div>
+                </div>`
+	if !strings.Contains(rr.Body.String(), expected) {
+		t.Errorf("HandleArtists returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	}
+
+	// Test for POST request (Should return Method Not Allowed)
+	req, err = http.NewRequest("POST", "/artists", nil) // Correct route for POST request
+	if err != nil {
+		t.Fatalf("Failed to create POST request: %v", err)
+	}
+
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusMethodNotAllowed {
+		t.Errorf("HandleArtists returned wrong status code for POST: got %v want %v", status, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -117,200 +184,17 @@ func TestHandleErrorPage(t *testing.T) {
 	}
 }
 
-func TestHandleAsciiWeb(t *testing.T) {
-
-	// Prepare the handler and create a request
-	handler := http.HandlerFunc(handleAsciiWeb)
-
-	// Test valid POST request with valid form data
-	formData := "banner=standard&text=hello&color=red&align=center"
-	log.Printf("TestHandleAsciiWeb - Valid request: %s", formData)
-	req, err := http.NewRequest("POST", "/ascii-web", strings.NewReader(formData))
-	if err != nil {
-		t.Fatalf("Failed to create POST request: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	rr := httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-
-	// Check if the response code is 200 OK
-	if status := rr.Code; status != http.StatusOK {
-		log.Printf("TestHandleAsciiWeb - Valid request: Expected status %v, got %v", http.StatusOK, status)
-		t.Errorf("handleAsciiWeb returned wrong status code for valid request: got %v want %v", status, http.StatusOK)
-	} else {
-		log.Printf("TestHandleAsciiWeb - Valid request: Received status %v, as expected", status)
+func TestMain(m *testing.M) {
+	// Set up global variables
+	publicUrl = "frontend/public/"
+	apiUrls = map[string]string{
+		"base":      "https://groupietrackers.herokuapp.com/api",
+		"artists":   "https://groupietrackers.herokuapp.com/api/artists",
+		"dates":     "https://groupietrackers.herokuapp.com/api/dates",
+		"Dates":     "https://groupietrackers.herokuapp.com/api/Dates",
+		"relations": "https://groupietrackers.herokuapp.com/api/relations",
 	}
 
-	// Test invalid POST data (missing 'text' field)
-	formData = "banner=standard&text=&color=red&align=center"
-	log.Printf("TestHandleAsciiWeb - Invalid POST data: %s", formData)
-	req, err = http.NewRequest("POST", "/ascii-web", strings.NewReader(formData))
-	if err != nil {
-		t.Fatalf("Failed to create POST request: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-
-	// Check if the response code is 400 Bad Request
-	if status := rr.Code; status != http.StatusBadRequest {
-		log.Printf("TestHandleAsciiWeb - Invalid request: Expected status %v, got %v", http.StatusBadRequest, status)
-		t.Errorf("handleAsciiWeb returned wrong status code for bad request: got %v want %v", status, http.StatusBadRequest)
-	} else {
-		log.Printf("TestHandleAsciiWeb - Invalid request: Received status %v, as expected", status)
-	}
-
-	// Test invalid banner (banner is not part of allowed banners)
-	formData = "banner=invalid-banner&text=hello&color=red&align=center"
-	log.Printf("TestHandleAsciiWeb - Invalid banner: %s", formData)
-	req, err = http.NewRequest("POST", "/ascii-web", strings.NewReader(formData))
-	if err != nil {
-		t.Fatalf("Failed to create POST request: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-
-	// Check if the response code is 404 Not Found
-	if status := rr.Code; status != http.StatusNotFound {
-		log.Printf("TestHandleAsciiWeb - Invalid banner: Expected status %v, got %v", http.StatusNotFound, status)
-		t.Errorf("handleAsciiWeb returned wrong status code for invalid banner: got %v want %v", status, http.StatusNotFound)
-	} else {
-		log.Printf("TestHandleAsciiWeb - Invalid banner: Received status %v, as expected", status)
-	}
-
-	// Test missing banner and text (empty fields should result in 400)
-	formData = "banner=&text=&color=red&align=center"
-	log.Printf("TestHandleAsciiWeb - Missing banner and text: %s", formData)
-	req, err = http.NewRequest("POST", "/ascii-web", strings.NewReader(formData))
-	if err != nil {
-		t.Fatalf("Failed to create POST request: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-
-	// Check if the response code is 400 Bad Request
-	if status := rr.Code; status != http.StatusBadRequest {
-		log.Printf("TestHandleAsciiWeb - Missing banner and text: Expected status %v, got %v", http.StatusBadRequest, status)
-		t.Errorf("handleAsciiWeb returned wrong status code for missing banner/text: got %v want %v", status, http.StatusBadRequest)
-	} else {
-		log.Printf("TestHandleAsciiWeb - Missing banner and text: Received status %v, as expected", status)
-	}
-
-	// Audit tests
-	testCases := []struct {
-		name         string
-		formData     string
-		expectedFile string
-		expectedCode int
-	}{
-		{
-			"Case 1: 123 and <Hello> (World)!",
-			`banner=standard&text={123}\n<Hello> (World)!`,
-			"backend/api/tests/1.txt",
-			http.StatusOK,
-		},
-
-		{
-			"Case 2: 123??",
-			`banner=standard&text=123??`,
-			"backend/api/tests/2.txt",
-			http.StatusOK,
-		},
-
-		{
-			"Case 3: $% \"= (shadow)",
-			`banner=shadow&text=%24%25%20%22%3D`,
-			"backend/api/tests/3.txt",
-			http.StatusOK,
-		},
-
-		{
-			"Case 4: 123 T/fs#R (thinkertoy)",
-			`banner=thinkertoy&text=123%20T%2Ffs%23R`,
-			"backend/api/tests/4.txt",
-			http.StatusOK,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			req, err := http.NewRequest("POST", "/ascii-web", strings.NewReader(tc.formData))
-			if err != nil {
-				t.Fatalf("Failed to create POST request: %v", err)
-			}
-			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-			rr := httptest.NewRecorder()
-			handler.ServeHTTP(rr, req)
-
-			// Verify HTTP status code
-			if rr.Code != tc.expectedCode {
-				t.Errorf("Expected status %v, got %v", tc.expectedCode, rr.Code)
-			}
-			// Load expected output from file and compare
-			expectedContent, err := ioutil.ReadFile(tc.expectedFile)
-			if err != nil {
-				t.Fatalf("Failed to read expected file %v: %v", tc.expectedFile, err)
-			}
-			if extractDivValueByID(rr.Body.String()) != string(expectedContent) {
-				t.Errorf("Expected output:\n%v\nGot:\n%v", string(expectedContent), extractDivValueByID(rr.Body.String()))
-			}
-		})
-	}
-}
-func extractTextareaText(htmlContent string) string {
-	// Define a regular expression to match the content inside the <textarea> with id="result"
-	re := regexp.MustCompile(`<textarea[^>]*>(.*?)</textarea>`)
-	match := re.FindStringSubmatch(htmlContent)
-	if len(match) < 2 {
-		return "er"
-	}
-
-	// The inner content will be the second element in the match slice
-	return match[1]
-}
-
-func extractDivValueByID(html string) string {
-	startTag := `<textarea class="result-box" id="result" style="color:; text-align:;">`
-	endTag := `</textarea>`
-
-	// Find the start index of the desired <div>
-	startIndex := strings.Index(html, startTag)
-	if startIndex == -1 {
-		return "Error - Call Support"
-	}
-	startIndex += len(startTag)
-
-	// Find the end index of the </div>
-	endIndex := strings.Index(html[startIndex:], endTag)
-	if endIndex == -1 {
-		return "Error - Call Support"
-	}
-	// Extract and return the content
-	return decodeHTMLEntities(html[startIndex : startIndex+endIndex])
-}
-
-// Function to replace HTML entities manually
-func decodeHTMLEntities(input string) string {
-	// Replacing the common HTML entities with their corresponding characters
-	replacements := map[string]string{
-		"&lt;":   "<",
-		"&gt;":   ">",
-		"&amp;":  "&",
-		"&quot;": "\"",
-		"&#39;":  "'",
-	}
-
-	// Loop through the map and replace the entities in the input string
-	for entity, char := range replacements {
-		input = strings.ReplaceAll(input, entity, char)
-	}
-
-	return input
+	// Run tests
+	os.Exit(m.Run())
 }
