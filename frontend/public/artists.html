@@ -1,13 +1,20 @@
 {{template "head"}}
 <body>
+
+  <script>
+    const allArtists = "{{ .ArtistsJsonData }}";
+</script>
     {{template "menu"}}
     <main>
         {{template "hero" "Singers & musicians"}}
+
+        {{template "artist_filter"}}
+        
         <div class="container">
           <div class="row">
-            {{range .}}
-              <div class="col-3 text-center mb-5">
-                <div class="card" style="width: 18rem;">
+            {{range .Artists}}
+              <div id="artist_{{.Id}}" class="col-xs-12 col-sm-6 col-md-3 text-center mb-5">
+                <div class="card" style="width: 100%;">
                   <img src="{{.Image}}" class="card-img-top" alt="{{.Name}}" style="max-height: 286px;">
                   <div class="card-body">
                     <h5 class="card-title mb-3">{{.Name}}</h5>

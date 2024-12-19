@@ -1,0 +1,67 @@
+{{define "artist_filter"}}
+
+<div class="mb-4 nav-filter">
+    <div class="container text-center">
+        <h1 class="filter-title">Filter Form</h1>
+    <div class="m-1 p-4 row-cols-sm-auto g-2 border text-dark mt-4 align-items-center filter-content-form">
+      <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+          <label class="form-label float-start" for="Creation date">Creation date:</label>
+          <div class="slider-value float-end" id="creation_date_value">2020</div>
+          <input type="range" class="form-range" id="creation_date" min="1950" max="2020" value="2020">
+        </div>
+
+        <div class="col-xs-12 col-sm-6 col-md-3">
+          <label class="form-label float-start" for="First album date">First album date:</label>
+          <div class="slider-value float-end" id="first_album_date_value">2020</div>
+          <input type="range" class="form-range" id="first_album_date" min="1950" max="2020" value="2020">
+        </div>
+
+        <div class="col-xs-12 col-sm-6 col-md-2">
+          <label class="form-label" for="Locations of concerts">Locations of concerts</label>
+          <div class="input-group">
+              <input type="text" class="form-control" placeholder="Locations of concerts">
+          </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-6 col-md-4">
+          <label class="form-label" for="Locations of concerts">Members count</label>
+          <div class="d-flex flex-wrap gap-3">
+              <div class="form-check d-inline-block">
+                  <input class="form-check-input" type="checkbox" id="members1" name="members[]" value="1" checked>
+                  <label class="form-check-label" for="members1">1</label>
+              </div>
+              <div class="form-check d-inline-block">
+                  <input class="form-check-input" type="checkbox" id="members2" name="members[]" value="2" checked>
+                  <label class="form-check-label" for="members2">2</label>
+              </div>
+              <div class="form-check d-inline-block">
+                  <input class="form-check-input" type="checkbox" id="members3" name="members[]" value="3" checked>
+                  <label class="form-check-label" for="members3">3</label>
+              </div>
+              <div class="form-check d-inline-block">
+                  <input class="form-check-input" type="checkbox" id="members4" name="members[]" value="4" checked>
+                  <label class="form-check-label" for="members4">4</label>
+              </div>
+              <div class="form-check d-inline-block">
+                  <input class="form-check-input" type="checkbox" id="members5" name="members[]" value="5" checked>
+                  <label class="form-check-label" for="members5">5</label>
+              </div>
+              <div class="form-check d-inline-block">
+                  <input class="form-check-input" type="checkbox" id="members6" name="members[]" value="6" checked>
+                  <label class="form-check-label" for="members6">6</label>
+              </div>
+              <div class="form-check d-inline-block">
+                  <input class="form-check-input" type="checkbox" id="members7" name="members[]" value="7" checked>
+                  <label class="form-check-label" for="members7">7</label>
+              </div>
+          </div>
+        </div>
+      </div>
+      
+        </div>
+      </div>
+</div>
+
+{{end}}
+  

@@ -196,6 +196,7 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 		publicUrl+"templates/header.html",
 		publicUrl+"templates/menu.html",
 		publicUrl+"templates/hero.html",
+		publicUrl+"templates/artist_filter.html",
 		publicUrl+"templates/footer.html",
 	)
 	if err != nil {
@@ -206,7 +207,23 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 	var data_obj_array []ArtistsData
 	sendGetRequest(url, &data_obj_array)
 
-	tmpl.Execute(w, data_obj_array)
+	jsonData, err := json.Marshal(data_obj_array)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	type ArtistsDataForPass struct {
+		Artists         []ArtistsData
+		ArtistsJsonData string
+	}
+
+	var data_obj_sender = ArtistsDataForPass{
+		Artists:         data_obj_array,
+		ArtistsJsonData: string(jsonData),
+	}
+
+	// Pass this JSON string to the template
+	tmpl.Execute(w, data_obj_sender)
 }
 
 func handleArtist(w http.ResponseWriter, r *http.Request) {

@@ -1,6 +1,6 @@
 {{define "footer"}}
 
-<div class="container">
+<div class="container-footer">
   <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
     <p class="col-md-4 mb-0 text-body-secondary">© 2024 GT by PR & MR</p>
 
@@ -19,21 +19,10 @@
 </div>
 
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="/static/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-  var Swipes = new Swiper('.swiper-container', {
-    spaceBetween: 0,
-    centeredSlides: false,
-    speed: 5000,
-    autoplay: {
-      delay: 1,
-    },
-    loop: true,
-    loopedSlides: 4,
-    slidesPerView:'auto',
-    allowTouchMove: false,
-    disableOnInteraction: true
-  });
-</script>
+<script src="/static/js/script.js"></script>
+
+
 {{end}}
