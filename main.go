@@ -21,8 +21,27 @@ func main() {
 	cmdBackend.Stdout = os.Stdout
 	cmdBackend.Stderr = os.Stderr
 
-	// Run the backend
-	if err := cmdBackend.Run(); err != nil {
-		log.Fatalf("Error running backend: %v", err)
+	// Start the second backend service (running go-routine/main.go)
+	fmt.Println("Starting backend with go-routine...")
+	cmdBackendRoutine := exec.Command("go", "run", "backend/api/go-routine/main.go")
+	cmdBackendRoutine.Stdout = os.Stdout
+	cmdBackendRoutine.Stderr = os.Stderr
+
+	// Run both commands concurrently
+	errChan := make(chan error, 2)
+
+	go func() {
+		errChan <- cmdBackend.Run()
+	}()
+
+	go func() {
+		errChan <- cmdBackendRoutine.Run()
+	}()
+
+	// Wait for both commands to finish or log an error if any fails
+	for i := 0; i < 2; i++ {
+		if err := <-errChan; err != nil {
+			log.Fatalf("Error running a backend command: %v", err)
+		}
 	}
 }
