@@ -159,6 +159,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
+		return
 	}
 
 	if r.URL.Path != "/" {
@@ -188,6 +189,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 func handleArtists(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
+		return
 	}
 
 	url, _, errUrl := generateUrl(r.URL.Path, "artists")
@@ -233,6 +235,7 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 func handleArtist(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
+		return
 	}
 
 	url, id, errUrl := generateUrl(r.URL.Path, "artist")
@@ -289,6 +292,7 @@ func handleArtist(w http.ResponseWriter, r *http.Request) {
 func handleLocations(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
+		return
 	}
 
 	url, _, errUrl := generateUrl(r.URL.Path, "locations")
@@ -331,6 +335,7 @@ func handleLocations(w http.ResponseWriter, r *http.Request) {
 func handleDates(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
+		return
 	}
 
 	url, _, errUrl := generateUrl(r.URL.Path, "dates")
@@ -373,6 +378,7 @@ func handleDates(w http.ResponseWriter, r *http.Request) {
 func handleRelations(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
+		return
 	}
 
 	tmpl, err := template.ParseFiles(
