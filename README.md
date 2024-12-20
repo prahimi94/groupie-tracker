@@ -48,6 +48,8 @@ An event consists in a system that responds to some kind of action triggered by 
 4. Open your browser and navigate to:
     ```arduino
     http://localhost:8080
+    or 
+    http://localhost:8082 for running with go routines
 
 5. Input your text, choose a banner, color, align, and generate your ASCII art!
 
