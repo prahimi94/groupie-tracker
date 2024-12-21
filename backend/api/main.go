@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -18,15 +19,16 @@ var apiUrls = map[string]string{
 }
 
 type ArtistsData struct {
-	Id           int      `json:"id"`
-	Image        string   `json:"image"`
-	Name         string   `json:"name"`
-	Members      []string `json:"members"`
-	CreationDate int      `json:"creationDate"`
-	FirstAlbum   string   `json:"firstAlbum"`
-	Locations    string   `json:"locations"`
-	ConcertDates string   `json:"concertDates"`
-	Relations    string   `json:"relations"`
+	Id            int      `json:"id"`
+	Image         string   `json:"image"`
+	Name          string   `json:"name"`
+	Members       []string `json:"members"`
+	CreationDate  int      `json:"creationDate"`
+	FirstAlbum    string   `json:"firstAlbum"`
+	Locations     string   `json:"locations"`
+	ConcertDates  string   `json:"concertDates"`
+	Relations     string   `json:"relations"`
+	LocationsData []string
 }
 
 type LocationsDataLevel2 struct {
@@ -186,6 +188,14 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data_obj)
 }
 
+func toJson(data interface{}) string {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return ""
+	}
+	return string(bytes)
+}
+
 func handleArtists(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		handleErrorPage(w, r, MethodNotAllowedError)
@@ -214,19 +224,46 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 	var data_obj_array []ArtistsData
 	sendGetRequest(url, &data_obj_array, nil)
 
+	var location_data_obj LocationsDataLevel1
+	sendGetRequest(apiUrls["locations"], &location_data_obj, nil)
+
+	var unique_locations []string
+
+	for _, v := range location_data_obj.Index {
+		for _, v2 := range v.Locations {
+			if !slices.Contains(unique_locations, v2) {
+				unique_locations = append(unique_locations, v2)
+			}
+		}
+
+		for artist_index, artist := range data_obj_array {
+			if artist.Id == v.Id {
+				data_obj_array[artist_index].LocationsData = v.Locations
+			}
+		}
+
+	}
+
 	jsonData, err := json.Marshal(data_obj_array)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	uniqueLocationsDataData, err := json.Marshal(unique_locations)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	type ArtistsDataForPass struct {
-		Artists         []ArtistsData
-		ArtistsJsonData string
+		Artists             []ArtistsData
+		ArtistsJsonData     string
+		UniqueLocationsData string
 	}
 
 	var data_obj_sender = ArtistsDataForPass{
-		Artists:         data_obj_array,
-		ArtistsJsonData: string(jsonData),
+		Artists:             data_obj_array,
+		ArtistsJsonData:     string(jsonData),
+		UniqueLocationsData: string(uniqueLocationsDataData),
 	}
 
 	tmpl.Execute(w, data_obj_sender)
