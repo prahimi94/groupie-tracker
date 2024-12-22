@@ -29,37 +29,60 @@ const creation_date_start_value = document.getElementById('creation_date_start_v
 const creation_date_end = document.getElementById('creation_date_end');
 const creation_date_end_value = document.getElementById('creation_date_end_value');
 
-creation_date_end.addEventListener('input', () => {
-  creation_date_end_value.textContent = creation_date_end.value;
-  check_dates();
-});
-
-creation_date_start.addEventListener('input', () => {
-  creation_date_start_value.textContent = creation_date_start.value;
-  check_dates();
-});
-
 const first_album_date_start = document.getElementById('first_album_date_start');
 const first_album_date_start_value = document.getElementById('first_album_date_start_value');
 const first_album_date_end = document.getElementById('first_album_date_end');
 const first_album_date_end_value = document.getElementById('first_album_date_end_value');
-first_album_date_start.addEventListener('input', () => {
+
+const select2Data = JSON.parse(allUniqueLocations).map(item => ({
+  id: item, // The value for the <option>
+  text: item.replace(/_/g, ' ').replace('-', ', ') // Display text with formatted replacements
+}));
+
+const $select = $('#concerts_locations');
+$select.select2({
+  data: select2Data,
+  placeholder: 'Select locations',
+  allowClear: true // Allows user to clear the selection
+});
+
+$("#concerts_locations").val('').change();
+
+function filter_result() {
+
+  creation_date_end_value.textContent = creation_date_end.value;
+  creation_date_start_value.textContent = creation_date_start.value;
   first_album_date_start_value.textContent = first_album_date_start.value;
-  check_dates();
-});
-
-first_album_date_end.addEventListener('input', () => {
   first_album_date_end_value.textContent = first_album_date_end.value;
-  check_dates();
-});
 
-function check_dates() {
+  const selectedLocations = $('#concerts_locations').val(); // Get selected values as an array
+  // Get all currently checked values
+  const checkboxes = document.querySelectorAll('input[name="members[]"]');
+  const selectedMemberCounts = Array.from(checkboxes)
+    .filter(checkbox => checkbox.checked)
+    .map(checkbox => parseInt(checkbox.value, 10));
+
   $.each(JSON.parse(allArtists), function( index, value ) {
     const dateString = value.firstAlbum
     const parts = dateString.split("-");
     const year = parts[2]; 
+    const membersCount = value['members'].length;
+    var showArtistForLocationFilter = true
+
+    if (selectedLocations && selectedLocations.length > 0) {
+      showArtistForLocationFilter = false
+      $.each(value['LocationsData'], function(index2, location) {
+        location.replace(/_/g, ' ').replace('-', ', ')
+        if (location == selectedLocations){
+          showArtistForLocationFilter = true;
+        }
+      }) 
+    }
+    
     if(value.creationDate >= creation_date_start.value && value.creationDate <= creation_date_end.value
       && year >= first_album_date_start.value && year <= first_album_date_end.value
+      && showArtistForLocationFilter
+      && selectedMemberCounts.includes(membersCount)
     ) {
       $('#artist_' + value.id).show()
     } else {
@@ -68,34 +91,16 @@ function check_dates() {
   });
 }
 
-const checkboxes = document.querySelectorAll('input[name="members[]"]');
-checkboxes.forEach(checkbox => {
-  checkbox.addEventListener('change', () => {
-    const isChecked = checkbox.checked;
-    const value = checkbox.value;
+function resetForm(){
 
-    // Get all currently checked values
-    const selectedValues = Array.from(checkboxes)
-      .filter(checkbox => checkbox.checked)
-      .map(checkbox => parseInt(checkbox.value, 10));
+  $("#concerts_locations").val('').change();
 
-    $.each(JSON.parse(allArtists), function( index, value ) {
-        const membersCount = value['members'].length;
+  $('input[name="members[]"]').prop('checked', true);
 
-        if(!selectedValues.includes(membersCount)){
-          $('#artist_' + value.id).hide()
-        } else {
-          $('#artist_' + value.id).show()
-        }
-    });
-  });
-});
+  $('#creation_date_start').val(1950).change();
+  $('#creation_date_end').val(2020).change();
+  $('#first_album_date_start').val(1950).change();
+  $('#first_album_date_end').val(2020).change();
 
-const select2Data = JSON.parse(allUniqueLocations).map(item => ({
-  id: item, // The value for the <option>
-  text: item.replace(/_/g, ' ').replace('-', ', ') // Display text with formatted replacements
-}));
-
-$('.js-example-basic-multiple').select2({
-  data: select2Data
-});
+  $('[id^="artist"]').show();
+}

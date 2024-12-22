@@ -8,70 +8,74 @@
         <div class="col-xs-12 col-sm-6 col-md-3">
           <label class="form-label float-start" for="Creation start date">Creation date start:</label>
           <div class="slider-value float-end" id="creation_date_start_value">1950</div>
-          <input type="range" class="form-range" id="creation_date_start" min="1950" max="2020" value="1950">
+          <input type="range" class="form-range" id="creation_date_start" min="1950" max="2020" value="1950" onchange="filter_result()" oninput="filter_result()">
         </div>
         <div class="col-xs-12 col-sm-6 col-md-3">
           <label class="form-label float-start" for="Creation end date">Creation date end:</label>
           <div class="slider-value float-end" id="creation_date_end_value">2020</div>
-          <input type="range" class="form-range" id="creation_date_end" min="1950" max="2020" value="2020">
+          <input type="range" class="form-range" id="creation_date_end" min="1950" max="2020" value="2020" onchange="filter_result()" oninput="filter_result()">
         </div>
 
         <div class="col-xs-12 col-sm-6 col-md-3">
           <label class="form-label float-start" for="First album start date">First album date start:</label>
           <div class="slider-value float-end" id="first_album_date_start_value">1950</div>
-          <input type="range" class="form-range" id="first_album_date_start" min="1950" max="2020" value="1950">
+          <input type="range" class="form-range" id="first_album_date_start" min="1950" max="2020" value="1950" onchange="filter_result()" oninput="filter_result()">
         </div>
 
         <div class="col-xs-12 col-sm-6 col-md-3">
           <label class="form-label float-start" for="First album end date">First album date end:</label>
           <div class="slider-value float-end" id="first_album_date_end_value">2020</div>
-          <input type="range" class="form-range" id="first_album_date_end" min="1950" max="2020" value="2020">
+          <input type="range" class="form-range" id="first_album_date_end" min="1950" max="2020" value="2020" onchange="filter_result()" oninput="filter_result()">
         </div>
-
+        
         <div class="col-xs-12 col-sm-6 col-md-6">
           <label class="form-label" for="Locations of concerts">Locations of concerts</label>
-          <div class="">
-            <select class="js-example-basic-multiple" name="states[]" multiple="multiple">
-            </select>
-              <!-- <input type="text" class="form-control" placeholder="Locations of concerts"> -->
-          </div>
+          <!-- <select id="concerts_locations" class="form-control" multiple="multiple"></select> -->
+          <select id="concerts_locations" class="form-control" onchange="filter_result()"></select>
         </div>
 
-        <div class="col-xs-12 col-sm-6 col-md-6">
+        <div class="col-xs-12 col-sm-4 col-md-4">
           <label class="form-label" for="Locations of concerts">Members count</label>
           <div class="d-flex flex-wrap gap-3">
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members1" name="members[]" value=1 checked>
+                  <input class="form-check-input" type="checkbox" id="members1" name="members[]" value=1 checked onchange="filter_result()">
                   <label class="form-check-label" for="members1">1</label>
               </div>
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members2" name="members[]" value=2 checked>
+                  <input class="form-check-input" type="checkbox" id="members2" name="members[]" value=2 checked onchange="filter_result()">
                   <label class="form-check-label" for="members2">2</label>
               </div>
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members3" name="members[]" value=3 checked>
+                  <input class="form-check-input" type="checkbox" id="members3" name="members[]" value=3 checked onchange="filter_result()">
                   <label class="form-check-label" for="members3">3</label>
               </div>
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members4" name="members[]" value=4 checked>
+                  <input class="form-check-input" type="checkbox" id="members4" name="members[]" value=4 checked onchange="filter_result()">
                   <label class="form-check-label" for="members4">4</label>
               </div>
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members5" name="members[]" value=5 checked>
+                  <input class="form-check-input" type="checkbox" id="members5" name="members[]" value=5 checked onchange="filter_result()">
                   <label class="form-check-label" for="members5">5</label>
               </div>
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members6" name="members[]" value=6 checked>
+                  <input class="form-check-input" type="checkbox" id="members6" name="members[]" value=6 checked onchange="filter_result()">
                   <label class="form-check-label" for="members6">6</label>
               </div>
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members7" name="members[]" value=7 checked>
+                  <input class="form-check-input" type="checkbox" id="members7" name="members[]" value=7 checked onchange="filter_result()">
                   <label class="form-check-label" for="members7">7</label>
               </div>
               <div class="form-check d-inline-block">
-                  <input class="form-check-input" type="checkbox" id="members8" name="members[]" value=8 checked>
+                  <input class="form-check-input" type="checkbox" id="members8" name="members[]" value=8 checked onchange="filter_result()">
                   <label class="form-check-label" for="members8">8</label>
               </div>
+          </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-2 col-md-2">
+          <div class="d-flex flex-wrap gap-3">
+            <label class="form-label" for="Reset form"> </label>
+            <button class="form-control btn btn-warning" type="button" onclick="resetForm()">Reset form</button>
           </div>
         </div>
       </div>
