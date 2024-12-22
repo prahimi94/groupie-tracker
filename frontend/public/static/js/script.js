@@ -34,7 +34,7 @@ const first_album_date_start_value = document.getElementById('first_album_date_s
 const first_album_date_end = document.getElementById('first_album_date_end');
 const first_album_date_end_value = document.getElementById('first_album_date_end_value');
 
-const select2Data = JSON.parse(allUniqueLocations).map(item => ({
+const select2Data = JSON.parse(allUniqueLocations).sort().map(item => ({
   id: item, // The value for the <option>
   text: item.replace(/_/g, ' ').replace('-', ', ') // Display text with formatted replacements
 }));
