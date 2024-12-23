@@ -473,10 +473,51 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 	var data_obj []ArtistsData
 	sendGetRequest(apiUrls["artists"], &data_obj, nil)
 
+	var location_data_obj LocationsDataLevel1
+	sendGetRequest(apiUrls["locations"], &location_data_obj, nil)
+
+	var unique_locations []string
+
+	for _, v := range location_data_obj.Index {
+		for _, v2 := range v.Locations {
+			if !slices.Contains(unique_locations, v2) {
+				unique_locations = append(unique_locations, v2)
+			}
+		}
+
+		for artist_index, artist := range data_obj {
+			if artist.Id == v.Id {
+				data_obj[artist_index].LocationsData = v.Locations
+			}
+		}
+
+	}
+
 	var filteredArtists []ArtistsData
 	for _, artist := range data_obj {
-		if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(searchText)) {
+		alreadyAdded := false
+
+		if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(searchText)) && !alreadyAdded {
 			filteredArtists = append(filteredArtists, artist)
+			alreadyAdded = true
+		} else if strings.Contains(strconv.Itoa(artist.CreationDate), strings.ToLower(searchText)) && !alreadyAdded {
+			filteredArtists = append(filteredArtists, artist)
+			alreadyAdded = true
+		} else if strings.Contains(artist.FirstAlbum, strings.ToLower(searchText)) && !alreadyAdded {
+			filteredArtists = append(filteredArtists, artist)
+			alreadyAdded = true
+		}
+		for _, member := range artist.Members {
+			if strings.Contains(strings.ToLower(member), strings.ToLower(searchText)) && !alreadyAdded {
+				filteredArtists = append(filteredArtists, artist)
+				alreadyAdded = true
+			}
+		}
+		for _, location := range artist.LocationsData {
+			if strings.Contains(strings.ToLower(location), strings.ToLower(searchText)) && !alreadyAdded {
+				filteredArtists = append(filteredArtists, artist)
+				alreadyAdded = true
+			}
 		}
 	}
 
@@ -503,14 +544,21 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	uniqueLocationsDataData, err := json.Marshal(unique_locations)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	type ArtistsDataForPass struct {
-		Artists         []ArtistsData
-		ArtistsJsonData string
+		Artists             []ArtistsData
+		ArtistsJsonData     string
+		UniqueLocationsData string
 	}
 
 	var data_obj_sender = ArtistsDataForPass{
-		Artists:         filteredArtists,
-		ArtistsJsonData: string(jsonData),
+		Artists:             filteredArtists,
+		ArtistsJsonData:     string(jsonData),
+		UniqueLocationsData: string(uniqueLocationsDataData),
 	}
 
 	tmpl.Execute(w, data_obj_sender)

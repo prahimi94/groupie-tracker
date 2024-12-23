@@ -67,6 +67,7 @@ main {
 
 .select2-container--default .select2-selection--single{
   border-radius: var(--bs-border-radius);
+  width:100%!important
 }
 
  /* Style the '×' clear button in Select2 */
@@ -80,4 +81,8 @@ main {
 /* Hover effect for the clear button */
 .select2-selection__clear:hover {
   color: #c82333; /* Darker red on hover */
+}
+
+.select2-container{
+  width:100%!important
 }

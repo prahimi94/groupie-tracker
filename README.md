@@ -3,6 +3,8 @@
 ## Description
 Groupie Trackers consists on receiving a given API and manipulate the data contained in it, in order to create a site, displaying the information.
 
+This project used to filter artists data based on user selections.
+
 It will be given an API, that consists in four parts:
 
 The first one, artists, containing information about some bands and artists like their name(s), image, in which year they began their activity, the date of their first album and the members.
@@ -48,16 +50,14 @@ An event consists in a system that responds to some kind of action triggered by 
 4. Open your browser and navigate to:
     ```arduino
     http://localhost:8080
-    or 
-    http://localhost:8082 for running with go routines
 
-5. Input your text, choose a banner, color, align, and generate your ASCII art!
+5. Go to artists menu and filter your selections.
 
-4. You can run test from root with this command:
+6. You can run test from root with this command:
     ```arduino
     go test ./...
 
-
+    
 ## Project Structure and Implementation
 Project has 2 main components
 
